@@ -1,0 +1,17 @@
+{
+  "name": "todayfeelslike",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "csv": "^0.4.6",
+    "moment": "^2.10.6",
+    "socket.io": "^1.2.1",
+    "twit": "^1.1.19"
+  }
+}

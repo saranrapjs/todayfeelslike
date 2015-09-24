@@ -1,0 +1,21 @@
+body {
+	padding: 100px;
+}
+
+hr {
+	margin: 50px 0;
+}
+
+.chart rect {
+  fill: steelblue;
+}
+
+.count {
+  fill: white;
+  font: 10px sans-serif;
+  text-anchor: end;
+}
+
+.day-of-week {
+	font: 12px sans-serif;
+}
