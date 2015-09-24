@@ -1,12 +1,14 @@
-var app = require('http').createServer(handler)
+var app = require('http').createServer(handler);
 var io = require('socket.io')(app);
 var fs = require('fs');
 var url = require("url");
 var moment = require('moment');
 var archiver = require('./archive.js');
+var config = require(__dirname + '/config.json');
 
 var days_of_week = moment.weekdays(),
-	counts;
+	counts = freshCounts(),
+	the_archives = [];
 
 function handler(req, res) {
   var uri = url.parse(req.url).pathname,
@@ -42,8 +44,6 @@ var day_matches = {
 
 var today = new Date().getDay();
 
-var counts = freshCounts();
-
 function freshCounts() {
 	return days_of_week.map(function() {
 		return 0;
@@ -78,37 +78,52 @@ function increment_counts(day) {
 	archiver.record(counts);
 }
 
-var Twit = require('twit')
+function populate_archives(rows) {
+	the_archives = rows.slice(0, 5).map(function(row) {
+		var greatest_virtual_day, // sunday default?
+			greatest_virtual_day_count = 0;
+		days_of_week.forEach(function(day, n) {
+			if (row[day] > greatest_virtual_day_count) {
+				greatest_virtual_day_count = row[day];
+				greatest_virtual_day = day;
+			}
+		});
+		row.max = greatest_virtual_day;
+		return row;
+	});
+}
 
-var config = require(__dirname + '/config.json');
+var Twit = require('twit')
 
 var T = new Twit(config);
 
-archiver.get_current(null, function(current) {
-	if (current) {
-		counts = days_of_week.map(function(day) {
-			return current[day];
-		});
-	}
-	app.listen(4242);
-
-	var stream = T.stream('statuses/filter', { 
-		track: [
-			'today feels like'
-		] 
-	});
-
-	io.on('connection', function (socket) {
-		io.emit('feelslike', counts);
-	});
-
-	stream.on('tweet', function (tweet) {
-		var day;
-		if ((day = filter(tweet.text)) !== false) {
-			increment_counts(day);
-			console.log(tweet.text, 'day:', day);
-			io.emit('feelslike', counts);
+archiver
+	.read(populate_archives)
+	.get_current(function(current) {
+		if (current) {
+			counts = days_of_week.map(function(day) {
+				return current[day];
+			});
 		}
-	});
+		app.listen(4242);
 
-});
+		var stream = T.stream('statuses/filter', { 
+			track: [
+				'today feels like'
+			] 
+		});
+
+		io.on('connection', function (socket) {
+			io.emit('feelslike', counts);
+			io.emit('archives', the_archives);
+		});
+
+		stream.on('tweet', function (tweet) {
+			var day;
+			if ((day = filter(tweet.text)) !== false) {
+				increment_counts(day);
+				console.log(tweet.text, 'day:', day);
+				io.emit('feelslike', counts);
+			}
+		});
+	});

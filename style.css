@@ -19,3 +19,15 @@ hr {
 .day-of-week {
 	font: 12px sans-serif;
 }
+
+blockquote {
+	background-color: #F1F1F1;
+	margin:0;
+	padding:2em;
+}
+
+ul {
+	list-style: none;
+	margin:0;
+	padding:0;
+}

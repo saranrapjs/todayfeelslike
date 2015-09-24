@@ -2,6 +2,15 @@ var socket = io(window.location.protocol + '//'+window.location.hostname+':4242'
 
 socket.on('feelslike', update_counts);
 
+socket.on('archives', function(the_archives) {
+	var archive_el = document.querySelector('ul');
+	the_archives.forEach(function(day) {
+		var li = document.createElement('li');
+		li.innerHTML = '...on ' + day['Day of Week'] + ' (' + day.Date + ') it tended to feel like ' + day.max;
+		archive_el.appendChild(li);
+	});
+});
+
 var width = 420,
     barHeight = 20,
     dayWidth = 80;
