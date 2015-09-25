@@ -56,7 +56,7 @@ window.addEventListener('load', function() {
 
 		setTimeout(function() {
 			window.location.reload();
-		}, next_time.diff(now) + 500);
+		}, next_time.diff(now) + 1500);
 
 		setInterval(function() {
 			from_now_el.textContent = next_time.fromNow();

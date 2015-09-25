@@ -33,4 +33,8 @@ describe("tweet filter", function(){
 		expect(filter("Am I the only one that feels like today's sunday..? I'm depressing myself for nothing day")).to.equal(0);
 	});
 
+	it("misc", function() {
+		expect(filter("Today kinda feels like Saturday day")).to.equal(6);
+	})
+
 });
