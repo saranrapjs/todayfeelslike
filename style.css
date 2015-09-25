@@ -7,7 +7,7 @@ hr {
 }
 
 .chart rect {
-  fill: steelblue;
+  fill: #46B480;
 }
 
 .count {
@@ -30,4 +30,8 @@ ul {
 	list-style: none;
 	margin:0;
 	padding:0;
+}
+
+.from-now {
+	font-size: 12px;
 }

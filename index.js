@@ -1,5 +1,3 @@
-var app = require('http').createServer(handler);
-var io = require('socket.io')(app);
 var fs = require('fs');
 var url = require("url");
 var moment = require('moment');
@@ -8,28 +6,8 @@ var config = require(__dirname + '/config.json');
 
 var days_of_week = moment.weekdays(),
 	counts = freshCounts(),
-	the_archives = [];
-
-function handler(req, res) {
-  var uri = url.parse(req.url).pathname,
-  	filename;
-  	if (uri === '/style.css') {
-  		filename = '/style.css';
-  	} else if (uri === '/script.js') {
-  		filename = '/script.js';
-  	} else {
-  		filename = '/index.html';
-  	}
-  fs.readFile(__dirname + filename,
-  function (err, data) {
-    if (err) {
-      res.writeHead(500);
-      return res.end('Error loading index.html');
-    }
-    res.writeHead(200);
-    res.end(data);
-  });
-}
+	the_archives = [],
+	update_frequency = 1000 * 60 * 2;
 
 var day_matches = {
 	'sunday': 0,
@@ -93,6 +71,31 @@ function populate_archives(rows) {
 	});
 }
 
+function render_tpl() {
+	var tpl = fs.readFileSync(__dirname + '/template.html').toString(),
+		today = moment(),
+		today_formatted = today.format('MM-DD-YYYY');
+
+	tpl = tpl.replace('data-chart=""', 'data-chart="'+ JSON.stringify(counts) + '"');
+
+	tpl = tpl.replace('<ul class="statistics"></ul>', '<ul class="statistics"><li>' + 
+		the_archives
+			.filter(function(day) {
+				return day.Date !== today_formatted;
+			})
+			.map(function(day) {
+				return '...on ' + day['Day of Week'] + ' (' + day.Date + ') it tended to feel like ' + day.max;
+			})
+			.join('</li><li>')
+	+ '</li></ul>');
+
+	tpl = tpl.replace('data-nextrefresh=""', 'data-nextrefresh="' + moment().add(update_frequency, 'milliseconds').toDate() + '"');
+
+	tpl = tpl.replace('<span class="generated-time"></span>', '<span class="generated-time">' + today.format("dddd, MMMM Do YYYY, h:mm:ss a") + '</span>');
+
+	fs.writeFileSync(__dirname + '/index.html', tpl);
+}
+
 var Twit = require('twit')
 
 var T = new Twit(config);
@@ -105,7 +108,6 @@ archiver
 				return current[day];
 			});
 		}
-		app.listen(4242);
 
 		var stream = T.stream('statuses/filter', { 
 			track: [
@@ -113,17 +115,14 @@ archiver
 			] 
 		});
 
-		io.on('connection', function (socket) {
-			io.emit('feelslike', counts);
-			io.emit('archives', the_archives);
-		});
-
 		stream.on('tweet', function (tweet) {
 			var day;
 			if ((day = filter(tweet.text)) !== false) {
 				increment_counts(day);
 				console.log(tweet.text, 'day:', day);
-				io.emit('feelslike', counts);
 			}
 		});
+
+		render_tpl();
+		setInterval(render_tpl, update_frequency);
 	});

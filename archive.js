@@ -2,7 +2,7 @@ var csv = require('csv'),
 	moment = require('moment'),
 	fs = require('fs'),
 	date_format = 'MM-DD-YYYY',
-	filename = 'sample.csv';
+	filename = 'history.csv';
 
 var weekdays = moment.weekdays();
 
@@ -90,7 +90,7 @@ function write_row(data) {
 			}
 		});
 		if (row_found === false) {
-			resulting_csv.push(data);
+			resulting_csv.unshift(data);
 		}
 		write_csv(resulting_csv);
 	});

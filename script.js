@@ -1,16 +1,3 @@
-var socket = io(window.location.protocol + '//'+window.location.hostname+':4242'); // change to localhost for local dev
-
-socket.on('feelslike', update_counts);
-
-socket.on('archives', function(the_archives) {
-	var archive_el = document.querySelector('ul');
-	the_archives.forEach(function(day) {
-		var li = document.createElement('li');
-		li.innerHTML = '...on ' + day['Day of Week'] + ' (' + day.Date + ') it tended to feel like ' + day.max;
-		archive_el.appendChild(li);
-	});
-});
-
 var width = 420,
     barHeight = 20,
     dayWidth = 80;
@@ -19,7 +6,6 @@ var x = d3.scale.linear()
     .range([0, width]);
 
 function update_counts(data) {
-	console.log('rebuild', data)
 	document.querySelector('.chart').innerHTML = ''; // definitely not the d3 "way" of doing it :)
 	var chart = d3.select(".chart")
 		.attr("width", width + dayWidth);
@@ -52,13 +38,30 @@ function update_counts(data) {
 		.attr("dy", ".35em")
 		.text(function(d, n) {
 			return moment().day(n).format('dddd');
-		})
-
+		});
 }
 
+var next_time,
+	from_now_el,
+	now = moment();
 
 window.addEventListener('load', function() {
 	document.querySelector('.today').textContent = moment().format('dddd');
+	update_counts(JSON.parse(document.body.getAttribute('data-chart')));
 
+	from_now_el = document.querySelector('.from-now-time');
+
+	if (document.body.dataset && document.body.dataset.nextrefresh) {
+		next_time = moment(new Date(document.body.dataset.nextrefresh));
+
+		setTimeout(function() {
+			window.location.reload();
+		}, next_time.diff(now) + 500);
+
+		setInterval(function() {
+			from_now_el.textContent = next_time.fromNow();
+		}, 200);
+
+	}
 
 });
