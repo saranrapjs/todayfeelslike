@@ -3,22 +3,12 @@ var url = require("url");
 var moment = require('moment');
 var archiver = require('./archive.js');
 var config = require(__dirname + '/config.json');
+var filter = require('./filter.js');
 
 var days_of_week = moment.weekdays(),
 	counts = freshCounts(),
 	the_archives = [],
 	update_frequency = 1000 * 60 * 2;
-
-var day_matches = {
-	'sunday': 0,
-	'monday': 1,
-	'tuesday': 2,
-	'wednesday': 3,
-	'wensday': 3,
-	'thursday': 4,
-	'friday': 5,
-	'saturday': 6
-};
 
 var today = new Date().getDay();
 
@@ -26,24 +16,6 @@ function freshCounts() {
 	return days_of_week.map(function() {
 		return 0;
 	});
-}
-
-function filter(text) {
-	var text = text.toLowerCase(),
-		smallestIndex = false;
-	for (var i in day_matches) {
-		var index = text.indexOf(i);
-		if (index !== -1) {
-			// we look for earlier uses of day-words, a dumb way to deal with "Today feels more like a Friday than a Thursday."
-			if (smallestIndex === false || (index < smallestIndex.index)) {
-				smallestIndex = {
-					index: index,
-					day: day_matches[i]
-				};
-			}
-		}
-	}
-	return smallestIndex ? smallestIndex.day : false;
 }
 
 function increment_counts(day) {
