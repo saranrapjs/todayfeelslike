@@ -35,3 +35,10 @@ ul {
 .from-now {
 	font-size: 12px;
 }
+
+.arc path {
+  stroke: #fff;
+    fill: #46B480;
+
+}
+

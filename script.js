@@ -1,44 +1,51 @@
-var width = 420,
-    barHeight = 20,
-    dayWidth = 80;
+var width = 960,
+    height = 500,
+    radius = Math.min(width, height) / 2;
 
 var x = d3.scale.linear()
     .range([0, width]);
 
+
+
+
+var color = d3.scale.ordinal()
+    .range(["#98abc5", "#8a89a6", "#7b6888", "#6b486b", "#a05d56", "#d0743c", "#ff8c00"]);
+
+
+var arc = d3.svg.arc()
+    .outerRadius(radius - 10)
+    .innerRadius(0);
+
+var pie = d3.layout.pie()
+    .sort(null)
+    .value(function(d) { return d; });
+
+var svg;
+
 function update_counts(data) {
-	document.querySelector('.chart').innerHTML = ''; // definitely not the d3 "way" of doing it :)
-	var chart = d3.select(".chart")
-		.attr("width", width + dayWidth);
+	var svg = d3.select(".chart")
+	    .attr("width", width)
+	    .attr("height", height)
+	  .append("g")
+	    .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
 
-	x.domain([0, d3.max(data, function(d) { return d; })]);
+	var g = svg.selectAll(".arc")
+	      .data(pie(data))
+	    .enter().append("g")
+	      .attr("class", function(d,n) {
+	      	return "arc " + moment().day(n).format('dddd').toLowerCase();
+	      });
 
-	chart.attr("height", barHeight * data.length);
+	  g.append("path")
+	      .attr("d", arc)
 
-	var bar = chart.selectAll("g")
-		.data(data)
-		.enter()
-		.append("g")
-		.attr("transform", function(d, i) { return "translate(0," + i * barHeight + ")"; });
-
-	bar.append("rect")
-		.attr("x", dayWidth)
-		.attr("width", function(d) { return x(d); })
-		.attr("height", barHeight - 1);
-
-	bar.append("text")
-		.attr("class", "count")
-		.attr("x", function(d) { return x(d) - 3 + dayWidth; })
-		.attr("y", barHeight / 2)
-		.attr("dy", ".35em")
-		.text(function(d) { return d; });
-
-	bar.append("text")
-		.attr("class", "day-of-week")
-		.attr("y", barHeight / 2)
-		.attr("dy", ".35em")
-		.text(function(d, n) {
-			return moment().day(n).format('dddd');
-		});
+	  g.append("text")
+	      .attr("transform", function(d) { return "translate(" + arc.centroid(d) + ")"; })
+	      .attr("dy", ".35em")
+	      .style("text-anchor", "middle")
+	      .text(function(d,n) { 
+	      	return moment().day(n).format('dddd');
+	      });
 }
 
 var next_time,
@@ -46,6 +53,12 @@ var next_time,
 	now = moment();
 
 window.addEventListener('load', function() {
+	svg = d3.select(".chart")
+		.attr("width", width)
+		.attr("height", height)
+		.append("g")
+		.attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
+
 	document.querySelector('.today').textContent = moment().format('dddd');
 	update_counts(JSON.parse(document.body.getAttribute('data-chart')));
 
