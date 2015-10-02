@@ -55,3 +55,6 @@ ul {
 	width: calc(100% + 100px);
 	margin-left: -50px;
 }
+.label-dont-show {
+	display: none;
+}

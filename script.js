@@ -41,8 +41,9 @@ function update_counts(data) {
 		};
 	});
 
-	var label_data = data.filter(function(d) {
-		return d.pct > 1;
+	var label_data = data.map(function(d) {
+		d.show_label = d.pct > 1;
+		return d;
 	});
 
 	var svg = d3.select(".chart")
@@ -101,6 +102,11 @@ function update_counts(data) {
 			pos[0] = radius * (midAngle(d) < Math.PI ? 1 : -1);
 			return "translate("+ pos +")";
 		})
+		.attr('class', function(d) {
+			if (d.data.show_label === false) {
+				return 'label-dont-show';
+			}
+		})
 
 
 	var polyline = svg.select(".lines").selectAll("polyline")
@@ -108,7 +114,13 @@ function update_counts(data) {
 
 	polyline.enter()
 		.append("polyline")
-		.attr('class', 'lines')
+		.attr('class', function(d) {
+			var class_name = 'lines';
+			if (d.data.show_label === false) {
+				class_name += ' label-dont-show';
+			}
+			return class_name;
+		})
 		.attr('points', function(d) {
 			var pos = outerArc.centroid(d);
 			pos[0] = radius * 0.95 * (midAngle(d) < Math.PI ? 1 : -1);
