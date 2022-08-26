@@ -2,7 +2,7 @@ var csv = require('csv'),
 	moment = require('moment'),
 	fs = require('fs'),
 	date_format = 'MM-DD-YYYY',
-	filename = 'history.csv';
+	filename = __dirname + '/history.csv';
 
 var weekdays = moment.weekdays();
 
