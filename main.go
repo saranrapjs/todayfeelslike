@@ -196,7 +196,6 @@ func (w Week) SVG() any {
 	centerX := float64(width / 2)
 	centerY := float64(height / 2)
 	radius := float64(160)
-	lineSweep := 0
 	var paths []any
 	var total int64
 	for _, count := range w {
@@ -209,6 +208,13 @@ func (w Week) SVG() any {
 		angle := twoPi * float64(count) / float64(total)
 		angleOffset := (sum / float64(total)) * twoPi
 		angleHalf := angleOffset + (angle / 2)
+
+		lineSweep := 0
+		if angle > math.Pi {
+			lineSweep = 1
+		}
+
+
 		// fmt.Println("i, angle, half, full", i, angleOffset, angleHalf, angleOffset + angle)
 		// fmt.Println("i, angle", i, angle)
 		// fmt.Println("i, half", i, angleHalf)
@@ -418,7 +424,7 @@ func (h *HistoryWriter) Upsert(now time.Time, w *Week) error {
 		},			
 	}
 	if len(h.LastLines) > 0 {
-		if h.LastLines[0].Date.Equal(now) {
+		if h.LastLines[0].Date.Format(timeLayout) == now.Format(timeLayout) {
 			h.LastLines[0].Week = w
 			newLines = h.LastLines
 		} else {
