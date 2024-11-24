@@ -52,6 +52,13 @@ ul {
 }
 
 .chart {
-	width: calc(100% + 100px);
-	margin-left: -50px;
+	max-width: 100%;
+}
+
+text.number-label {
+	alignment-baseline: middle;
+}
+
+text.pie-number {
+	text-anchor: middle;
 }

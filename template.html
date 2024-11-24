@@ -1,23 +1,45 @@
 <html>
 <head>
 	<link rel="stylesheet" href="style.css">
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.6/d3.min.js"></script>
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.10.6/moment.min.js"></script>
-	<script src="script.js"></script>
 	<title>Today feels like</title>
 </head>
-<body class="" data-chart="" data-nextrefresh="">
-	<h1>Today is a <span class="today"></span></h1>
+<body class="">
+	<h1>Today is a <span class="today">{{.Now.Format "Monday"}}</span></h1>
 	<h1>It <em>feels</em> like a:</h1>
-	<svg class="chart"></svg>
+	{{with .CurrentDays.SVG}}
+		<svg class="chart" viewBox="0 0 {{.Width}} {{.Height}}" width="{{.Width}}">
+		{{range .Paths}}
+			{{with .Circle}}
+				<circle fill="#CE96C8" cx="{{.CX}}" cy="{{.CY}}" r="{{.Radius}}" />
+			{{else}}
+				{{if not .Empty}}
+				<path d="{{.Path}}"
+					style="fill:#CE96C8;
+						fill-opacity: 1;
+						stroke:white;
+						stroke-width: 1"/>	
+				{{end}}
+			{{end}}
+			{{if not .Empty}}
+				<polyline class="lines" points={{.LabelPath}} />
+				<text class="number-label" text-anchor="{{.LabelAnchor}}" transform="{{.LabelTransform}}" fill="black">{{.Day}}</text>
+				<text class="pie-number" transform="{{.PieLabelTransform}}" fill="white">{{.Count}}</text>	
+			{{end}}
+		{{end}}
+		</svg>
+	{{end}}
 	<hr>
 	<p>An idea from <a href="http://mothersnews.net">Jacob:</a></p>
 	<blockquote>
 		I find that people always want to corroborate with you what today feels like- "don't you think today feels like a sunday?" and so on. It would be nice to have a somewhat definitive look at what today feels like to the most people.
 	</blockquote>
-	<p>This page is automatically generated, counting the number of times people on Twitter say something like "today feels like a ___" for any given day of the week.</p>
-	<ul class="statistics"></ul>
-	<p><a href="history.csv">Download the historical data (csv)</a></p>
-	<p class="from-now">This page was generated at <span class="generated-time"></span> and the page will automatically update <span class="from-now-time"></span>.</p>
+	<p>This page is automatically generated, counting the number of times people on BlueSky say something like "today feels like a ___" for any given day of the week.</p>
+	<ul class="statistics">
+		{{range .HistoryWriter.LastLines}}
+		<li>...on {{.Date.Weekday}} ({{.Date.Format "01/02"}}) it tended to feel like {{.Week.Max}}</li>
+		{{end}}
+	</ul>
+	<!-- <p><a href="history.csv">Download the historical data (csv)</a></p> -->
+	<p class="from-now">This page was generated at <span class="generated-time">{{.Now}}</span> and the page will automatically update <span class="from-now-time">in 30 seconds</span>.</p>
 </body>
 </html>

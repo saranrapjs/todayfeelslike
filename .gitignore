@@ -3,3 +3,7 @@ cache.json
 config.json
 index.html
 history.csv
+out.html
+today-feels-like
+justfile
+*.db

@@ -48,6 +48,12 @@ function render_tpl() {
 		today = moment(),
 		today_formatted = today.format('MM-DD-YYYY');
 
+	var currentDay = new Date().getDay();
+	if (currentDay !== today) {
+		today = currentDay;
+		counts = freshCounts();
+	}
+
 	tpl = tpl.replace('data-chart=""', 'data-chart="'+ JSON.stringify(counts) + '"');
 
 	tpl = tpl.replace('<ul class="statistics"></ul>', '<ul class="statistics"><li>' + 
